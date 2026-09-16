@@ -178,13 +178,18 @@ window.IsoActor = (function () {
         G.prism(ctx, x - 5, gy + stride * 0.15, 5, 3, LEG_Z, faces(shade(pal.top, -25), pal.left, pal.right));
         G.prism(ctx, x + 5, gy - stride * 0.15, 5, 3, LEG_Z, faces(shade(pal.top, -25), pal.left, pal.right));
 
-        const torsoY = gy - LEG_Z;
-        G.prism(ctx, x, torsoY, FOOT_HW, FOOT_HH, BODY_Z, faces(pal.top, pal.left, pal.right));
-        G.prism(ctx, x, torsoY - 2, FOOT_HW - 2, FOOT_HH - 1, 4, faces(pal.accent, shade(pal.left, 10), shade(pal.right, 10)));
-
-        const headY = torsoY - BODY_Z;
-        G.prism(ctx, x, headY, 7, 4, HEAD_Z, faces(pal.skin, shade(pal.skin, -35), shade(pal.skin, -15)));
-        G.prism(ctx, x, headY - HEAD_Z + 2, 8, 4, 3, faces(pal.top, pal.left, pal.right));
+        if (window.render8BitEntity && opts && opts.sprite) {
+            ctx.save();
+            ctx.translate(x, gy - 2);
+            ctx.scale(flip, 1);
+            window.render8BitEntity(ctx, 0, 0, opts.sprite);
+            ctx.restore();
+        } else {
+            const torsoY = gy - LEG_Z;
+            G.prism(ctx, x, torsoY, FOOT_HW, FOOT_HH, BODY_Z, faces(pal.top, pal.left, pal.right));
+            const headY = torsoY - BODY_Z;
+            G.prism(ctx, x, headY, 7, 4, HEAD_Z, faces(pal.skin, shade(pal.skin, -35), shade(pal.skin, -15)));
+        }
 
         drawWeapon(ctx, x, gy, pal, kit, flip, phase);
         ctx.restore();
@@ -215,7 +220,7 @@ window.IsoActor = (function () {
             (window.gameTime || 0) + (hero.convoiIndex || 0) * 0.35,
             facing(hero.dir),
             kitOf(hero.type, true),
-            { leader: isLeader }
+            { leader: isLeader, sprite: hero.type }
         );
         hpBar(ctx, hero.x, hero.y, (hero.hp || 1) / (hero.maxHp || 1), false);
     }
@@ -228,7 +233,7 @@ window.IsoActor = (function () {
             (window.gameTime || 0) * 0.85 + e.x * 0.01,
             flip,
             'spear',
-            { elite: !!e.isElite }
+            { elite: !!e.isElite, sprite: e.sprite || e.type }
         );
         hpBar(ctx, e.x, e.y, (e.hp || 1) / (e.maxHp || 1), !!e.boss);
         if (e.affix) {

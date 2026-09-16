@@ -7,7 +7,7 @@ window.Campaign = {
             id: 1,
             name: 'Ashfen Marches',
             biome: 'wilds',
-            killGate: 36,
+            killGate: 18,
             banner: 'ACT 1 — ASHFEN MARCHES',
             portalLabel: 'Gate to Saltglass',
             mobs: [
@@ -22,7 +22,7 @@ window.Campaign = {
             id: 2,
             name: 'Saltglass Waste',
             biome: 'desert',
-            killGate: 42,
+            killGate: 22,
             banner: 'ACT 2 — SALTGLASS WASTE',
             portalLabel: 'Gate to Silkveil',
             mobs: [
@@ -36,7 +36,7 @@ window.Campaign = {
             id: 3,
             name: 'Silkveil Temple',
             biome: 'jungle',
-            killGate: 48,
+            killGate: 24,
             banner: 'ACT 3 — SILKVEIL TEMPLE',
             portalLabel: 'Gate to Ember Council',
             mobs: [
@@ -50,7 +50,7 @@ window.Campaign = {
             id: 4,
             name: 'Ember Council',
             biome: 'highlands',
-            killGate: 52,
+            killGate: 26,
             banner: 'ACT 4 — EMBER COUNCIL',
             portalLabel: 'Gate to Last Ember',
             mobs: [
@@ -58,14 +58,14 @@ window.Campaign = {
                 { type: 'council_acolyte', fromWave: 1 },
                 { type: 'horn_brute', fromWave: 2 }
             ],
-            slaughter: { type: 'hall_cleaver', name: 'Hall Cleaver', atKills: 22 },
+            slaughter: { type: 'hall_cleaver', name: 'Hall Cleaver', atKills: 12 },
             boss: { type: 'council_shade', name: 'Council Shade' }
         },
         {
             id: 5,
             name: 'Last Ember Keep',
             biome: 'fortress',
-            killGate: 58,
+            killGate: 28,
             banner: 'ACT 5 — LAST EMBER KEEP',
             portalLabel: null,
             mobs: [

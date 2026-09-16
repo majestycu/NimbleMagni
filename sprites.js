@@ -1,7 +1,9 @@
+window.SPRITE_TARGET_H = 30;
+
 function drawPixelSprite(ctx, x, y, matrix, palette, pixelSize = 3) {
   if (!matrix || !matrix.length) return;
   const startX = Math.floor(x - (matrix[0].length * pixelSize) / 2);
-  const startY = Math.floor(y - (matrix.length * pixelSize) / 2);
+  const startY = Math.floor(y - matrix.length * pixelSize);
 
   for (let r = 0; r < matrix.length; r++) {
     for (let c = 0; c < matrix[r].length; c++) {
@@ -209,7 +211,6 @@ window.render8BitEntity = function(ctx, x, y, rawType, direction = 'down') {
   if (alias[t]) t = alias[t];
 
   let matrix, palette;
-  let size = 3;
 
   if (heroSprites[t]) {
     matrix = heroSprites[t];
@@ -217,12 +218,12 @@ window.render8BitEntity = function(ctx, x, y, rawType, direction = 'down') {
   } else if (monsterSprites[t]) {
     matrix = monsterSprites[t];
     palette = palettes.monster;
-    if (t === 'cleaver') size = 4;
   } else {
     matrix = heroSprites.warrior;
     palette = palettes.hero;
   }
 
+  const size = (window.SPRITE_TARGET_H || 30) / matrix.length;
   drawPixelSprite(ctx, x, y, matrix, palette, size);
 };
 

@@ -88,17 +88,11 @@ window.AssetBank = (function () {
     }
 
     function preload() {
-        const m = window.AssetManifest;
-        Object.values(m.heroes).forEach(loadImage);
-        Object.values(m.tiles).forEach(loadImage);
-        Object.values(m.props).forEach(loadImage);
-        Object.values(m.vfx).forEach(loadImage);
-        Object.values(m.foes).forEach(loadImage);
+        // Canvas-only until asset pack is wired.
     }
 
     function get(group, key) {
-        const src = window.AssetManifest[group] && window.AssetManifest[group][key];
-        return src ? loadImage(src) : null;
+        return null;
     }
 
     function drawChroma(ctx, img, x, y, w, h) {

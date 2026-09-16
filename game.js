@@ -66,11 +66,11 @@ window.addEventListener('load', () => {
 
     window.SKILL_NAMES = { 
         WARRIOR: ["whirlwind", "shockwave", "battleshout"],
-        PALADIN: ["heavenstrike", "blessedhammer", "massheal"],
+        PALADIN: ["blessedhammer", "heavenstrike", "massheal"],
         MAGE: ["chainlightning", "meteor", "blizzard"],
-        NECROMANCER: ["bloodwave", "curse", "poisonnova"],
+        NECROMANCER: ["bloodwave", "decrepify", "poisonnova"],
         DRUID: ["entanglingroots", "hurricane", "cataclysm"],
-        ROGUE: ["arrowvolley", "penetratingshot", "frostshot"]
+        ROGUE: ["arrowvolley", "penetratingshot", "shadowstep", "frostshot"]
     };
 
     window.HERO_EMOJIS = {

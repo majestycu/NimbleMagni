@@ -90,8 +90,14 @@ window.EnemySpawner = (function () {
     }
 
     function spawnNamed(canvas, spec) {
-        const x = (window.LEFT_PANEL_WIDTH || 220) + (canvas.width - (window.LEFT_PANEL_WIDTH || 220)) / 2;
-        enemies.push(makeEnemy(spec.type, x, 90, { displayName: spec.name }));
+        let x = (window.LEFT_PANEL_WIDTH || 220) + (canvas.width - (window.LEFT_PANEL_WIDTH || 220)) / 2;
+        let y = 90;
+        if (window.board && window.WorldBoard && window.WorldBoard.cellCenter) {
+            const p = window.WorldBoard.cellCenter(window.board, 9, 1);
+            x = p.x;
+            y = p.y;
+        }
+        enemies.push(makeEnemy(spec.type, x, y, { displayName: spec.name }));
     }
 
     function dropFrom(e) {
