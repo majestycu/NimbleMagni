@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nimble Quest: Sanctuary</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0a0a0c;
+            font-family: 'Courier New', Courier, monospace;
+            color: #dcdde1;
+            touch-action: manipulation;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #sidebar, #hero-panel {
+            max-width: 110px;
+            width: 22vw;
+            font-size: 11px;
+            padding: 4px 6px;
+            background: rgba(10, 10, 15, 0.75);
+            backdrop-filter: blur(4px);
+            border: 1px solid #d4af37;
+        }
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0c;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        h1 {
+            font-size: 36px;
+            color: #d4af37;
+            text-shadow: 3px 3px #000, 0 0 15px rgba(212, 175, 55, 0.4);
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            color: #a4b0be;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        .hero-card {
+            background: #141418;
+            border: 1px solid #57606f;
+            border-radius: 4px;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .hero-card:hover {
+            border-color: #d4af37;
+            background: #1e1e24;
+        }
+        .hero-card.selected {
+            border: 2px solid #d4af37;
+            background: #23232d;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        .hero-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f1c40f;
+            margin-bottom: 4px;
+        }
+        .hero-role {
+            font-size: 12px;
+            color: #e1b12c;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .hero-skills {
+            font-size: 11px;
+            color: #a4b0be;
+            line-height: 1.3;
+        }
+        .btn {
+            background: #7f1d1d;
+            color: #f8fafc;
+            border: 2px solid #d4af37;
+            padding: 14px 35px;
+            font-size: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #991b1b;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
+        }
+        #gameOverMenu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 12, 0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            text-align: center;
+        }
+        #debug-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(200, 0, 0, 0.9);
+            color: #fff;
+            font-size: 12px;
+            z-index: 99999;
+            padding: 6px;
+            word-break: break-all;
+            font-family: monospace;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="debug-error"></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="start-screen">
+        <h1>NIMBLE QUEST: SANCTUARY</h1>
+        <div class="subtitle">Alege liderul convoiului:</div>
+        <div class="hero-grid">
+            <div class="hero-card selected" onclick="selectHero('warrior', this)">
+                <div class="hero-name">⚔️ Warrior</div>
+                <div class="hero-role">Melee Tank</div>
+                <div class="hero-skills">Whirlwind, Shockwave, Battle Shout</div>
+            </div>
+            <div class="hero-card" onclick="selectHero('paladin', this)">
+                <div class="hero-name">🛡️ Paladin</div>
+                <div class="hero-role">Holy Defender</div>
+                <div class="hero-skills">Mass Heal, Heaven Strike, Blessed Hammer</div>
+            </div>
+            <div class="hero-card" onclick="selectHero('rogue', this)">
+                <div class="hero-name">🏹 Rogue</div>
+                <div class="hero-role">Agile Archer</div>
+                <div class="hero-skills">Arrow Volley, Frost Shot, Penetrating Shot</div>
+            </div>
+            <div class="hero-card" onclick="selectHero('mage', this)">
+                <div class="hero-name">🔮 Mage</div>
+                <div class="hero-role">Arcane Caster</div>
+                <div class="hero-skills">Blizzard, Chain Lightning, Meteor</div>
+            </div>
+            <div class="hero-card" onclick="selectHero('necromancer', this)">
+                <div class="hero-name">💀 Necromancer</div>
+                <div class="hero-role">Dark Summoner</div>
+                <div class="hero-skills">Poison Nova, Blood Wave, Curse</div>
+            </div>
+            <div class="hero-card" onclick="selectHero('druid', this)">
+                <div class="hero-name">🌿 Druid</div>
+                <div class="hero-role">Nature Warden</div>
+                <div class="hero-skills">Hurricane, Cataclysm, Entangling Roots</div>
+            </div>
+        </div>
+        <button class="btn" onclick="onStartClick()">PORNESTE EXPEDITIA</button>
+        <p style="margin-top:14px;color:#a4b0be;font-size:12px;">WASD / swipe · P pauză · T skill tree</p>
+    </div>
+
+    <div id="gameOverMenu">
+        <h1>SFÂRȘITUL DRUMULUI</h1>
+        <p style="color: #a4b0be; font-size: 16px; margin-bottom: 20px;">Convoiul vostru a căzut pradă întunericului.<br>Scor final: <span id="finalScore" style="color: #f1c40f;">0</span> | Kills: <span id="finalKills" style="color: #f1c40f;">0</span></p>
+        <button class="btn" onclick="onRestartClick()">Încearcă Din Nou</button>
+    </div>
+
+    <script>
+        window.selectedHeroClass = 'warrior';
+        function selectHero(heroClass, element) {
+            document.querySelectorAll('.hero-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            window.selectedHeroClass = heroClass;
+        }
+        function onStartClick() {
+            const startScreen = document.getElementById('start-screen');
+            if (startScreen) {
+                startScreen.style.display = 'none';
+            }
+            const gameOverMenu = document.getElementById('gameOverMenu');
+            if (gameOverMenu) {
+                gameOverMenu.style.display = 'none';
+            }
+            if (typeof window.startGame === 'function') {
+                window.startGame(window.selectedHeroClass);
+            }
+        }
+        function onRestartClick() {
+            const gameOverMenu = document.getElementById('gameOverMenu');
+            if (gameOverMenu) {
+                gameOverMenu.style.display = 'none';
+            }
+            const startScreen = document.getElementById('start-screen');
+            if (startScreen) {
+                startScreen.style.display = 'none';
+            }
+            if (typeof window.startGame === 'function') {
+                window.startGame(window.selectedHeroClass);
+            }
+        }
+    </script>
+
+    <script src="audio.js"></script>
+    <script src="sprites.js"></script>
+    <script src="enemies.js"></script>
+    <script src="skills/SkillEffects.js"></script>
+    <script src="skills/Skill.js"></script>
+    <script src="heroes/Hero.js"></script>
+    <script src="heroes/Warrior.js"></script>
+    <script src="heroes/Paladin.js"></script>
+    <script src="heroes/Rogue.js"></script>
+    <script src="heroes/Mage.js"></script>
+    <script src="heroes/Necromancer.js"></script>
+    <script src="heroes/Druid.js"></script>
+    <script src="heroes.js"></script>
+    <script src="SkillTree.js"></script>
+    <script src="InputManager.js"></script>
+    <script src="CollisionSystem.js"></script>
+    <script src="ConvoyManager.js"></script>
+    <script src="WaveManager.js"></script>
+    <script src="GameEngine.js"></script>
+    <script src="enemies_act1.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
