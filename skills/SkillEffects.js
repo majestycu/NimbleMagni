@@ -134,6 +134,18 @@
             pts.push({ x: x2, y: y2 });
             return pts;
         },
+        integrate(p, dt) {
+            if (!p._velNorm) {
+                const mag = Math.hypot(p.vx || 0, p.vy || 0);
+                if (mag > 0 && mag < 40) {
+                    p.vx *= 60;
+                    p.vy *= 60;
+                }
+                p._velNorm = true;
+            }
+            p.x += (p.vx || 0) * dt;
+            p.y += (p.vy || 0) * dt;
+        },
         pushProjectile(list, p) {
             p.active = true;
             if (p.life === undefined) p.life = 2;

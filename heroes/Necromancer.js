@@ -21,12 +21,18 @@
             if (!this.minion) return;
             const mx = this.x + Math.cos(this.minion.angle) * this.minion.distance;
             const my = this.y + Math.sin(this.minion.angle) * this.minion.distance;
-            ctx.save();
-            ctx.fillStyle = '#4c1d95';
-            ctx.beginPath();
-            ctx.arc(mx, my, 6, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            if (window.IsoGeom) {
+                window.IsoGeom.prism(ctx, mx, my, 6, 3, 12, {
+                    top: '#7c3aed', left: '#2e1065', right: '#5b21b6', edge: '#000'
+                });
+            } else {
+                ctx.save();
+                ctx.fillStyle = '#4c1d95';
+                ctx.beginPath();
+                ctx.arc(mx, my, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
         }
 
         attack(px, py, enemies, projectilesList, dir) {
@@ -51,8 +57,7 @@
                         pierce: true,
                         hitEnemies: new Set(),
                         update(dt, list) {
-                            this.x += this.vx;
-                            this.y += this.vy;
+                            window.SkillFx.integrate(this, dt);
                             this.life -= dt;
                             if (this.life <= 0) this.active = false;
                             (list || enemies || []).forEach(m => {
@@ -129,8 +134,7 @@
                     hitEnemies: new Set(),
                     owner: this,
                     update(dt) {
-                        this.x += this.vx;
-                        this.y += this.vy;
+                        window.SkillFx.integrate(this, dt);
                         this.life -= dt;
                         if (this.life <= 0) this.active = false;
                         (enemies || window.EnemiesAct1 && window.EnemiesAct1.enemies || []).forEach(m => {

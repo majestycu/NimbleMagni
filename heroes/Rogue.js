@@ -27,7 +27,7 @@
                         vx: Math.cos(a) * 10, vy: Math.sin(a) * 10,
                         damage: 9 * dmgMult, radius: 7, angle: a, life: 1.4,
                         update(dt, list) {
-                            this.x += this.vx; this.y += this.vy; this.life -= dt;
+                            window.SkillFx.integrate(this, dt); this.life -= dt;
                             if (this.life <= 0) this.active = false;
                             (list || enemies || []).forEach(m => {
                                 if (!m || m.hp <= 0) return;
@@ -83,12 +83,11 @@
                     draw(ctx) {
                         ctx.save();
                         ctx.globalAlpha = this.alpha * 0.7;
-                        if (window.render8BitEntity) {
-                            window.render8BitEntity(ctx, this.x, this.y, 'ROGUE', 'down');
+                        if (window.IsoActor) {
+                            window.IsoActor.drawHero(ctx, {
+                                x: this.x, y: this.y, type: 'ROGUE', dir: 'DOWN', hp: 1, maxHp: 1
+                            }, false);
                         }
-                        ctx.strokeStyle = '#86efac';
-                        ctx.setLineDash([4, 3]);
-                        ctx.strokeRect(this.x - 12, this.y - 16, 24, 24);
                         ctx.restore();
                     }
                 });
@@ -104,7 +103,7 @@
                     damage: 11 * dmgMult, radius: 8, angle: aim, life: 1.5,
                     pierce: true, hitEnemies: new Set(),
                     update(dt) {
-                        this.x += this.vx; this.y += this.vy; this.life -= dt;
+                        window.SkillFx.integrate(this, dt); this.life -= dt;
                         if (this.life <= 0) this.active = false;
                         (enemies || []).forEach(m => {
                             if (!m || m.hp <= 0 || this.hitEnemies.has(m)) return;
@@ -137,7 +136,7 @@
                         vx: Math.cos(a) * 9.5, vy: Math.sin(a) * 9.5,
                         damage: 5.5 * dmgMult, radius: 6, angle: a, life: 1.2,
                         update(dt, list) {
-                            this.x += this.vx; this.y += this.vy; this.life -= dt;
+                            window.SkillFx.integrate(this, dt); this.life -= dt;
                             if (this.life <= 0) this.active = false;
                             (list || enemies || []).forEach(m => {
                                 if (!m || m.hp <= 0) return;

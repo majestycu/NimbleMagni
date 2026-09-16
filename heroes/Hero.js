@@ -79,7 +79,7 @@
         tryUltimate() {
             if (!this.ultimateReady || !this.ultimateSkill || !this.unlockedSkills.has(this.ultimateSkill)) return false;
             this.ultimateReady = false;
-            this.ultimateTimer = 18;
+            this.ultimateTimer = 22;
             this.ultimateFlashTimer = 0.6;
             if (window.floatingTexts) {
                 window.floatingTexts.push({
@@ -104,48 +104,17 @@
         }
 
         draw(ctx, isLeader) {
-            if (isLeader) {
-                ctx.save();
-                ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y + 10, 8, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
+            if (window.IsoActor) {
+                window.IsoActor.drawHero(ctx, this, isLeader);
+            } else if (window.render8BitEntity) {
+                window.render8BitEntity(ctx, this.x, this.y, this.type, (this.dir || 'DOWN').toLowerCase());
             }
-            const heroImg = window.AssetBank && window.AssetBank.get('heroes', this.type);
-            const painted = heroImg && window.AssetBank.drawChroma(ctx, heroImg, this.x, this.y - 10, 36, 36);
-            if (!painted) {
-                if (window.render8BitEntity) {
-                    window.render8BitEntity(ctx, this.x, this.y, this.type, (this.dir || 'DOWN').toLowerCase());
-                } else {
-                    ctx.fillStyle = this.color || '#fff';
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            const barW = 28;
-            const barH = 4;
-            const bx = this.x - barW / 2;
-            const by = this.y - 24;
-            ctx.save();
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(bx - 1, by - 1, barW + 2, barH + 2);
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(bx, by, barW, barH);
-            const hpRatio = Math.max(0, Math.min(1, this.hp / this.maxHp));
-            ctx.fillStyle = '#22c55e';
-            ctx.fillRect(bx, by, barW * hpRatio, barH);
-            ctx.restore();
-
             if (this.ultimateFlashTimer > 0) {
                 ctx.save();
                 ctx.strokeStyle = '#facc15';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, 20 + this.ultimateFlashTimer * 10, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, 18 + this.ultimateFlashTimer * 8, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.restore();
             }

@@ -1,28 +1,28 @@
 window.EnemySpawner = (function () {
     const STATS = {
         rotwalker: { hp: 38, speed: 38, radius: 14, sprite: 'rotwalker' },
-        hedge_imp: { hp: 16, speed: 92, radius: 9, sprite: 'hedge_imp' },
-        bramble_rat: { hp: 28, speed: 70, radius: 11, sprite: 'bramble_rat', ranged: true },
-        fen_chanter: { hp: 34, speed: 52, radius: 11, sprite: 'fen_chanter', ranged: true },
-        sand_scarab: { hp: 32, speed: 74, radius: 11, sprite: 'scarab' },
-        dust_jackal: { hp: 22, speed: 110, radius: 10, sprite: 'dust_jackal' },
-        cinder_nomad: { hp: 40, speed: 58, radius: 12, sprite: 'cinder_nomad', ranged: true },
-        web_drone: { hp: 20, speed: 88, radius: 9, sprite: 'web_drone' },
-        fang_spider: { hp: 36, speed: 70, radius: 13, sprite: 'fang_spider' },
-        temple_cultist: { hp: 44, speed: 50, radius: 12, sprite: 'temple_cultist', ranged: true },
-        ash_raider: { hp: 34, speed: 80, radius: 11, sprite: 'ash_raider' },
-        council_acolyte: { hp: 42, speed: 55, radius: 12, sprite: 'council_acolyte', ranged: true },
-        horn_brute: { hp: 70, speed: 42, radius: 16, sprite: 'horn_brute' },
-        ember_hound: { hp: 30, speed: 100, radius: 11, sprite: 'ember_hound' },
-        void_thrall: { hp: 48, speed: 60, radius: 13, sprite: 'void_thrall' },
+        hedge_imp: { hp: 16, speed: 92, radius: 14, sprite: 'hedge_imp' },
+        bramble_rat: { hp: 28, speed: 70, radius: 14, sprite: 'bramble_rat', ranged: true },
+        fen_chanter: { hp: 34, speed: 52, radius: 14, sprite: 'fen_chanter', ranged: true },
+        sand_scarab: { hp: 32, speed: 74, radius: 14, sprite: 'sand_scarab' },
+        dust_jackal: { hp: 22, speed: 110, radius: 14, sprite: 'dust_jackal' },
+        cinder_nomad: { hp: 40, speed: 58, radius: 14, sprite: 'cinder_nomad', ranged: true },
+        web_drone: { hp: 20, speed: 88, radius: 14, sprite: 'web_drone' },
+        fang_spider: { hp: 36, speed: 70, radius: 14, sprite: 'fang_spider' },
+        temple_cultist: { hp: 44, speed: 50, radius: 14, sprite: 'temple_cultist', ranged: true },
+        ash_raider: { hp: 34, speed: 80, radius: 14, sprite: 'ash_raider' },
+        council_acolyte: { hp: 42, speed: 55, radius: 14, sprite: 'council_acolyte', ranged: true },
+        horn_brute: { hp: 70, speed: 42, radius: 14, sprite: 'horn_brute' },
+        ember_hound: { hp: 30, speed: 100, radius: 14, sprite: 'ember_hound' },
+        void_thrall: { hp: 48, speed: 60, radius: 14, sprite: 'void_thrall' },
         keep_sentinel: { hp: 64, speed: 46, radius: 14, sprite: 'keep_sentinel', ranged: true },
-        crypt_warden: { hp: 420, speed: 46, radius: 22, sprite: 'crypt_warden', boss: true },
-        dune_hollow: { hp: 520, speed: 36, radius: 26, sprite: 'dune_hollow', boss: true, burrow: true },
-        venom_matron: { hp: 480, speed: 52, radius: 24, sprite: 'venom_matron', boss: true, poison: true },
-        hall_cleaver: { hp: 380, speed: 58, radius: 22, sprite: 'hall_cleaver', boss: true },
-        council_shade: { hp: 560, speed: 44, radius: 22, sprite: 'council_shade', boss: true, caster: true },
-        ash_sovereign: { hp: 640, speed: 50, radius: 24, sprite: 'ash_sovereign', boss: true },
-        last_ember: { hp: 820, speed: 42, radius: 26, sprite: 'last_ember', boss: true, caster: true }
+        crypt_warden: { hp: 420, speed: 46, radius: 14, sprite: 'crypt_warden', boss: true },
+        dune_hollow: { hp: 520, speed: 36, radius: 14, sprite: 'dune_hollow', boss: true, burrow: true },
+        venom_matron: { hp: 480, speed: 52, radius: 14, sprite: 'venom_matron', boss: true, poison: true },
+        hall_cleaver: { hp: 380, speed: 58, radius: 14, sprite: 'hall_cleaver', boss: true },
+        council_shade: { hp: 560, speed: 44, radius: 14, sprite: 'council_shade', boss: true, caster: true },
+        ash_sovereign: { hp: 640, speed: 50, radius: 14, sprite: 'ash_sovereign', boss: true },
+        last_ember: { hp: 820, speed: 42, radius: 14, sprite: 'last_ember', boss: true, caster: true }
     };
 
     const AFFIXES = ['swift', 'armored', 'vampiric', 'volatile'];
@@ -69,7 +69,7 @@ window.EnemySpawner = (function () {
             e.affix = affix;
             e.maxHp = Math.round(e.maxHp * 2.6);
             e.hp = e.maxHp;
-            e.radius *= 1.45;
+            e.radius = 14;
             if (affix === 'swift') e.speed *= 1.35;
             if (affix === 'armored') e.maxHp = e.hp = Math.round(e.hp * 1.3);
             e.baseSpeed = e.speed;
@@ -218,7 +218,12 @@ window.EnemySpawner = (function () {
             window.townPortal = null;
             enemies = [];
             const next = window.Campaign.current();
-            window.boardDecor = window.WorldBoard.generate(canvas, next);
+            window.board = window.WorldBoard.generate(canvas, next);
+            window.boardDecor = window.board;
+            if (window.board.spawn) {
+                player.x = window.board.spawn.x;
+                player.y = window.board.spawn.y;
+            }
             addFloatingText({ x: player.x, y: player.y - 36, text: next.banner, color: '#facc15', timer: 3.2 });
             if (window.SoundManager) window.SoundManager.collect();
         }
@@ -284,43 +289,9 @@ window.EnemySpawner = (function () {
                 ctx.restore();
                 return;
             }
-            if (e.isElite) {
-                ctx.save();
-                ctx.strokeStyle = '#facc15';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(e.x, e.y, e.radius + 6, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
-            }
-            const foeImg = window.AssetBank && (
-                window.AssetBank.get('foes', e.sprite) || window.AssetBank.get('foes', e.type)
-            );
-            const size = e.boss ? 78 : (e.isElite ? 56 : 44);
-            const painted = foeImg && window.AssetBank.drawChroma(ctx, foeImg, e.x, e.y - 6, size, size);
-            if (!painted && window.render8BitEntity) {
-                window.render8BitEntity(ctx, e.x, e.y, e.sprite || e.type, 'down');
-            }
-            if (e.hp < e.maxHp || e.boss || e.isElite) {
-                const bw = e.boss ? 48 : 22;
-                const bx = e.x - bw / 2;
-                const by = e.y - e.radius - 10;
-                ctx.fillStyle = '#111';
-                ctx.fillRect(bx, by, bw, 4);
-                ctx.fillStyle = e.boss ? '#facc15' : '#22c55e';
-                ctx.fillRect(bx, by, bw * Math.max(0, e.hp / e.maxHp), 4);
-            }
-            if (e.displayName || e.boss) {
-                ctx.fillStyle = '#f8fafc';
-                ctx.font = 'bold 10px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(e.displayName || e.type, e.x, e.y - e.radius - 16);
-            }
-            if (e.affix) {
-                ctx.fillStyle = '#fde68a';
-                ctx.font = '9px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(e.affix.toUpperCase(), e.x, e.y + e.radius + 12);
+            if (window.IsoActor) {
+                window.IsoActor.drawFoe(ctx, e);
+                return;
             }
         });
         const flags = window.campaignFlags;

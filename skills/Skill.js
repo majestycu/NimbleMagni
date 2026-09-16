@@ -13,8 +13,11 @@
         }
 
         update(deltaTime, enemies) {
-            this.x += this.vx;
-            this.y += this.vy;
+            if (window.SkillFx) window.SkillFx.integrate(this, deltaTime);
+            else {
+                this.x += (this.vx || 0) * deltaTime * 60;
+                this.y += (this.vy || 0) * deltaTime * 60;
+            }
             this.life -= deltaTime;
             if (this.life <= 0) {
                 this.active = false;

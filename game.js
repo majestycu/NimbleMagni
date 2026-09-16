@@ -38,7 +38,7 @@ window.addEventListener('load', () => {
         vx: 0,
         vy: -((window.Campaign && window.Campaign.PLAYER_SPEED) || 132),
         dir: { x: 0, y: -1 },
-        radius: 12,
+        radius: 14,
         hp: 150,
         maxHp: 150,
         invulnerableTimer: 0
@@ -190,8 +190,10 @@ window.addEventListener('load', () => {
         window.killsSinceLastChest = 0;
 
         window.player.speed = window.Campaign.PLAYER_SPEED;
-        window.player.x = window.LEFT_PANEL_WIDTH + (canvas.width - window.LEFT_PANEL_WIDTH) / 2;
-        window.player.y = canvas.height / 2;
+        window.board = window.WorldBoard.generate(canvas, window.Campaign.current());
+        window.boardDecor = window.board;
+        window.player.x = window.board.spawn.x;
+        window.player.y = window.board.spawn.y;
         window.player.vx = 0;
         window.player.vy = -window.player.speed;
         window.player.dir = { x: 0, y: -1 };
@@ -237,48 +239,17 @@ window.addEventListener('load', () => {
 
         let availableTypes = ['WARRIOR', 'MAGE', 'ROGUE', 'NECROMANCER', 'PALADIN', 'DRUID'].filter(t => t !== lType);
         let startHeroType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        const recruit = window.WorldBoard.cellCenter(window.board, 1, 1);
         window.unclaimedHeroes.push({
-            x: window.player.x + 150,
-            y: window.player.y - 150,
+            x: recruit.x,
+            y: recruit.y,
             type: startHeroType,
             pulseTimer: 0,
             currentSkill: window.SKILL_NAMES[startHeroType] ? window.SKILL_NAMES[startHeroType][0] : 'whirlwind'
         });
 
-        let wallThickness = 32;
         window.grassPatches = [];
-        for (let i = 0; i < 35; i++) {
-            let gx = window.LEFT_PANEL_WIDTH + wallThickness + 20 + Math.random() * (canvas.width - window.LEFT_PANEL_WIDTH - wallThickness * 2 - 40);
-            let gy = wallThickness + 20 + Math.random() * (canvas.height - wallThickness * 2 - 40);
-            let flowerColor = Math.random() < 0.5 ? '#dc2626' : '#1e3a8a';
-            window.grassPatches.push({ x: gx, y: gy, color: flowerColor, size: 2 + Math.random() * 3 });
-        }
-
         window.forestDecorations = [];
-        let attempts = 0;
-        while (window.forestDecorations.length < 18 && attempts < 200) {
-            attempts++;
-            let tx = window.LEFT_PANEL_WIDTH + wallThickness + 32 + Math.random() * (canvas.width - window.LEFT_PANEL_WIDTH - wallThickness * 2 - 64);
-            let ty = wallThickness + 32 + Math.random() * (canvas.height - wallThickness * 2 - 64);
-            
-            let distToCenter = Math.hypot(tx - (window.LEFT_PANEL_WIDTH + (canvas.width - window.LEFT_PANEL_WIDTH) / 2), ty - canvas.height / 2);
-            if (distToCenter < 100) continue;
-            
-            let tooClose = false;
-            for (let dec of window.forestDecorations) {
-                if (Math.hypot(tx - dec.x, ty - dec.y) < 70) {
-                    tooClose = true;
-                    break;
-                }
-            }
-            if (tooClose) continue;
-            
-            let r = Math.random();
-            let decType = r < 0.5 ? 'tree' : (r < 0.75 ? 'stump' : (r < 0.9 ? 'tombstone' : 'bone'));
-            window.forestDecorations.push({ x: tx, y: ty, type: decType });
-        }
-
-        window.boardDecor = window.WorldBoard.generate(canvas, window.Campaign.current());
 
         let startScreen = document.getElementById('start-screen');
         if (startScreen) startScreen.style.display = 'none';
@@ -332,8 +303,52 @@ window.addEventListener('load', () => {
         try {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const act = window.Campaign.current();
+            const sprites = [];
+            window.unclaimedHeroes.forEach(uh => {
+                sprites.push({
+                    y: uh.y,
+                    draw(c) {
+                        if (window.IsoActor) {
+                            window.IsoActor.drawHero(c, {
+                                x: uh.x, y: uh.y, type: uh.type, dir: 'DOWN', hp: 1, maxHp: 1
+                            }, false);
+                        }
+                    }
+                });
+            });
+            (window.enemies || []).forEach(e => {
+                if (!e || e.hp <= 0) return;
+                sprites.push({
+                    y: e.y,
+                    draw(c) {
+                        if (e.hidden) {
+                            c.save();
+                            c.globalAlpha = 0.25;
+                            c.fillStyle = '#78716c';
+                            c.beginPath();
+                            c.ellipse(e.x, e.y, e.radius, e.radius * 0.4, 0, 0, Math.PI * 2);
+                            c.fill();
+                            c.restore();
+                            return;
+                        }
+                        if (window.IsoActor) window.IsoActor.drawFoe(c, e);
+                    }
+                });
+            });
+            window.convoi.forEach((hero, index) => {
+                sprites.push({
+                    y: hero.y,
+                    draw(c) {
+                        if (index === 0 && window.player.invulnerableTimer > 0 && Math.floor(window.gameTime * 30) % 2 === 0) {
+                            c.globalAlpha = 0.4;
+                        }
+                        if (hero && typeof hero.draw === 'function') hero.draw(c, index === 0);
+                        c.globalAlpha = 1;
+                    }
+                });
+            });
             if (window.WorldBoard) {
-                window.WorldBoard.draw(ctx, canvas, act, window.boardDecor || [], window.gameTime);
+                window.WorldBoard.draw(ctx, canvas, act, window.board || window.boardDecor, window.gameTime, sprites);
             }
 
             if (window.WaveManager && window.WaveManager.townPortal) {
@@ -352,77 +367,47 @@ window.addEventListener('load', () => {
             }
 
             window.chests.forEach(c => {
-                let pulse = Math.sin(window.gameTime * 8) * 4;
-                ctx.shadowColor = '#facc15';
-                ctx.shadowBlur = 15 + pulse;
-                ctx.fillStyle = c.isBossChest ? '#fbbf24' : '#eab308';
-                ctx.fillRect(c.x - 12, c.y - 10, 24, 20);
-                ctx.fillStyle = '#18181b';
-                ctx.fillRect(c.x - 3, c.y - 4, 6, 8);
-                ctx.shadowBlur = 0;
+                if (window.IsoActor && window.IsoActor.drawLoot) {
+                    window.IsoActor.drawLoot(ctx, c.x, c.y, 'CHEST');
+                }
             });
 
             window.itemDrops.forEach(drop => {
-                ctx.save();
-                ctx.shadowBlur = 10;
-                if (drop.type === 'BOOTS') {
-                    ctx.shadowColor = '#06b6d4';
-                    ctx.fillStyle = '#06b6d4';
-                    ctx.fillRect(drop.x - 8, drop.y - 8, 16, 16);
-                } else if (drop.type === 'ATTACK_SPEED') {
-                    ctx.shadowColor = '#ef4444';
-                    ctx.fillStyle = '#ef4444';
-                    ctx.beginPath();
-                    ctx.arc(drop.x, drop.y, 9, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (drop.type === 'HEART') {
-                    ctx.shadowColor = '#22c55e';
-                    ctx.fillStyle = '#22c55e';
-                    ctx.fillRect(drop.x - 3, drop.y - 9, 6, 18);
-                    ctx.fillRect(drop.x - 9, drop.y - 3, 18, 6);
-                } else if (drop.type === 'MIGHTY_ORB') {
-                    ctx.shadowColor = '#a855f7';
-                    ctx.fillStyle = '#a855f7';
-                    ctx.beginPath();
-                    ctx.arc(drop.x, drop.y, 9, 0, Math.PI * 2);
-                    ctx.fill();
+                if (window.IsoActor && window.IsoActor.drawLoot) {
+                    window.IsoActor.drawLoot(ctx, drop.x, drop.y, drop.type);
                 }
-                ctx.restore();
             });
 
             window.skillOrbs.forEach(orb => {
-                ctx.save();
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#f472b6';
-                ctx.fillStyle = '#f472b6';
-                ctx.beginPath();
-                ctx.arc(orb.x, orb.y, 14, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            });
-
-            window.unclaimedHeroes.forEach(uh => {
-                ctx.save();
-                ctx.fillStyle = '#4b5563';
-                ctx.beginPath();
-                ctx.arc(uh.x, uh.y, 20, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                if (window.IsoActor && window.IsoActor.drawLoot) {
+                    window.IsoActor.drawLoot(ctx, orb.x, orb.y, 'SKILL');
+                }
             });
 
             window.xpGems.forEach(gem => {
-                ctx.save();
-                ctx.fillStyle = '#22d3ee';
-                ctx.beginPath();
-                ctx.arc(gem.x, gem.y, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                if (window.IsoActor && window.IsoActor.drawLoot) {
+                    window.IsoActor.drawLoot(ctx, gem.x, gem.y, 'GEM');
+                }
             });
 
             if (window.GroundZones) window.GroundZones.draw(ctx);
 
             if (window.EnemySpawner) {
-                window.EnemySpawner.draw(ctx);
+                const flags = window.campaignFlags;
+                if (flags && flags.portal) {
+                    const tp = flags.portal;
+                    ctx.save();
+                    ctx.translate(tp.x, tp.y);
+                    ctx.rotate(tp.angle);
+                    ctx.strokeStyle = '#93c5fd';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 22, 12, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(59,130,246,0.35)';
+                    ctx.fill();
+                    ctx.restore();
+                }
             }
 
             window.projectiles.forEach(p => {
@@ -434,16 +419,6 @@ window.addEventListener('load', () => {
                     ctx.arc(p.x, p.y, p.radius || 5, 0, Math.PI * 2);
                     ctx.fill();
                 }
-            });
-
-            window.convoi.forEach((hero, index) => {
-                if (index === 0 && window.player.invulnerableTimer > 0 && Math.floor(window.gameTime * 30) % 2 === 0) {
-                    ctx.globalAlpha = 0.4;
-                }
-                if (hero && typeof hero.draw === 'function') {
-                    hero.draw(ctx, index === 0);
-                }
-                ctx.globalAlpha = 1.0;
             });
 
             window.particles.forEach(p => {

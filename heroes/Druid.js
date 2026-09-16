@@ -118,8 +118,7 @@
                     radius: 10,
                     life: 1.8,
                     update(dt, list) {
-                        this.x += this.vx;
-                        this.y += this.vy;
+                        window.SkillFx.integrate(this, dt);
                         this.life -= dt;
                         if (this.life <= 0) this.active = false;
                         (list || enemies || []).forEach(m => {

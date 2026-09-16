@@ -4,7 +4,8 @@ window.CollisionSystem = {
         const LEFT_PANEL_WIDTH = window.LEFT_PANEL_WIDTH || 220;
 
         if (player.x < LEFT_PANEL_WIDTH + wallMargin || player.x > canvas.width - wallMargin ||
-            player.y < wallMargin || player.y > canvas.height - wallMargin) {
+            player.y < wallMargin || player.y > canvas.height - wallMargin ||
+            (window.WorldBoard && window.WorldBoard.hitsWall(player.x, player.y, window.board))) {
             if (window.SoundManager) window.SoundManager.hit();
             gameOverCallback();
             return;

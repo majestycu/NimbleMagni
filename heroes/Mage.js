@@ -86,6 +86,7 @@
                         this.life -= dt;
                         if (this.y >= this.targetY || this.life <= 0) {
                             this.active = false;
+                            if (window.SoundManager) window.SoundManager.explosion();
                             (enemies || []).forEach(m => {
                                 if (m && m.hp > 0 && Math.hypot(m.x - this.targetX, m.y - this.targetY) < 48) {
                                     window.StatusEffects.dealDamage(m, this.damage);

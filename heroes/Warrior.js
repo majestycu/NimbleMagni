@@ -25,7 +25,10 @@
                     h.castMult = Math.max(0.85, (h.castMult || 1) * 0.9);
                 });
                 if (window.player) {
-                    window.player.speed = Math.min(5, (window.player.speed || 3) + 0.4);
+                    const boots = (window.gameUpgrades && window.gameUpgrades.speedBoostCount) || 0;
+                    window.player.speed = window.Campaign.PLAYER_SPEED * (1 + boots * 0.08) * 1.12;
+                    if (window.player.vx !== 0) window.player.vx = Math.sign(window.player.vx) * window.player.speed;
+                    if (window.player.vy !== 0) window.player.vy = Math.sign(window.player.vy) * window.player.speed;
                 }
                 window.SkillFx.pushProjectile(res, {
                     x: this.x, y: this.y, vx: 0, vy: 0, life: 0.7, radius: 20,
@@ -65,7 +68,7 @@
                     damage: 12 * dmgMult, radius: 26, angle: aim, life: 1.1,
                     pierce: true, hitEnemies: new Set(),
                     update(dt) {
-                        this.x += this.vx; this.y += this.vy; this.life -= dt;
+                        window.SkillFx.integrate(this, dt); this.life -= dt;
                         if (this.life <= 0) this.active = false;
                         (enemies || []).forEach(m => {
                             if (!m || m.hp <= 0 || this.hitEnemies.has(m)) return;
