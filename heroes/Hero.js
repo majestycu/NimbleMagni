@@ -114,7 +114,7 @@
                 ctx.restore();
             }
             const heroImg = window.AssetBank && window.AssetBank.get('heroes', this.type);
-            const painted = heroImg && window.AssetBank.drawChroma(ctx, heroImg, this.x, this.y - 8, 52, 52);
+            const painted = heroImg && window.AssetBank.drawChroma(ctx, heroImg, this.x, this.y - 10, 36, 36);
             if (!painted) {
                 if (window.render8BitEntity) {
                     window.render8BitEntity(ctx, this.x, this.y, this.type, (this.dir || 'DOWN').toLowerCase());

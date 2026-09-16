@@ -95,5 +95,6 @@ window.Campaign = {
             finaleDead: false,
             portal: null
         };
+        return window.campaignFlags;
     }
 };

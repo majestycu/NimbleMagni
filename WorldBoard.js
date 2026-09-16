@@ -131,13 +131,6 @@ window.WorldBoard = (function () {
         const size = 48;
         ctx.fillStyle = '#070709';
         ctx.fillRect(left, 0, canvas.width - left, canvas.height);
-        const tileImg = window.AssetBank && window.AssetBank.get('tiles', act.biome);
-        if (tileImg && tileImg.complete && tileImg.naturalWidth) {
-            ctx.save();
-            ctx.globalAlpha = 0.42;
-            ctx.drawImage(tileImg, left, 0, canvas.width - left, canvas.height);
-            ctx.restore();
-        }
         for (let y = -size; y < canvas.height + size; y += size / 2) {
             const row = Math.floor(y / (size / 2));
             for (let x = left - size; x < canvas.width + size; x += size) {

@@ -28,11 +28,28 @@ window.AssetManifest = {
     },
     foes: {
         rotwalker: 'assets/foes/rotwalker.png',
+        hedge_imp: 'assets/foes/rotwalker.png',
+        bramble_rat: 'assets/foes/rotwalker.png',
+        fen_chanter: 'assets/foes/council_shade.png',
+        sand_scarab: 'assets/foes/dune_hollow.png',
+        dust_jackal: 'assets/foes/rotwalker.png',
+        cinder_nomad: 'assets/foes/council_shade.png',
+        web_drone: 'assets/foes/venom_matron.png',
+        fang_spider: 'assets/foes/venom_matron.png',
+        temple_cultist: 'assets/foes/council_shade.png',
+        ash_raider: 'assets/foes/hall_cleaver.png',
+        council_acolyte: 'assets/foes/council_shade.png',
+        horn_brute: 'assets/foes/hall_cleaver.png',
+        ember_hound: 'assets/foes/rotwalker.png',
+        void_thrall: 'assets/foes/council_shade.png',
+        keep_sentinel: 'assets/foes/hall_cleaver.png',
         crypt_warden: 'assets/foes/crypt_warden.png',
         dune_hollow: 'assets/foes/dune_hollow.png',
         venom_matron: 'assets/foes/venom_matron.png',
         hall_cleaver: 'assets/foes/hall_cleaver.png',
-        council_shade: 'assets/foes/council_shade.png'
+        council_shade: 'assets/foes/council_shade.png',
+        ash_sovereign: 'assets/foes/ash_sovereign.png',
+        last_ember: 'assets/foes/last_ember.png'
     }
 };
 
@@ -61,7 +78,7 @@ window.AssetBank = (function () {
             const r = px[i];
             const gb = px[i + 1];
             const b = px[i + 2];
-            if (r > 170 && b > 150 && gb < 130 && r + b > gb * 2.4) {
+            if (r > 230 && gb < 40 && b > 230) {
                 px[i + 3] = 0;
             }
         }

@@ -227,7 +227,7 @@ window.EnemySpawner = (function () {
     function update(dt, canvas, gameTime, player, projectiles, addFloatingText) {
         const act = window.Campaign.current();
         const left = window.LEFT_PANEL_WIDTH || 220;
-        const flags = window.campaignFlags || window.Campaign.reset() || window.campaignFlags;
+        const flags = window.campaignFlags || window.Campaign.reset();
         spawnTimer += dt;
         eliteTimer += dt;
         const interval = Math.max(1.15, 2.4 - Math.floor(gameTime / 30) * 0.12);
