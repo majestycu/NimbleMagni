@@ -140,6 +140,10 @@
             if (p.isHeroProjectile === undefined) p.isHeroProjectile = true;
             list.push(p);
             return p;
+        },
+        stampVfx(ctx, key, x, y, w, h) {
+            if (!window.AssetBank) return false;
+            return window.AssetBank.stamp(ctx, 'vfx', key, x, y, w || 48, h || 48);
         }
     };
 

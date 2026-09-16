@@ -222,10 +222,11 @@
                             ctx.shadowBlur = 0;
                             ctx.beginPath();
                             ctx.moveTo(pts[0].x, pts[0].y);
-                            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                            for (let i = 1; i < pts.length; i++)                             ctx.lineTo(pts[i].x, pts[i].y);
                             ctx.stroke();
                         });
                         ctx.restore();
+                        if (window.SkillFx) window.SkillFx.stampVfx(ctx, 'chainlightning', this.x, this.y, 64, 64);
                     }
                 });
                 if (window.SoundManager) window.SoundManager.cast();

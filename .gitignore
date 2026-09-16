@@ -3,4 +3,6 @@ Thumbs.db
 *.log
 .idea/
 .vscode/
-node_modules/
+_ref_old_nimble/
+_ref_webpagev6/
+

@@ -148,7 +148,7 @@ const monsterSprites = {
     ".bbbbbbbb.",
     "..bb..bb.."
   ],
-  butcher: [
+  cleaver: [
     "....BBBBBB....",
     "...BBBBBBBB...",
     "..BBffBBffBB..",
@@ -177,7 +177,36 @@ const monsterSprites = {
 window.render8BitEntity = function(ctx, x, y, rawType, direction = 'down') {
   let t = (rawType || '').toLowerCase().trim();
   if (t === 'necromancer') t = 'necro';
-  if (t === 'fallen_shaman' || t === 'shaman') t = 'fallen';
+
+  const alias = {
+    rotwalker: 'zombie',
+    hedge_imp: 'fallen',
+    bramble_rat: 'quill_rat',
+    fen_chanter: 'fallen',
+    sand_scarab: 'scarab',
+    dust_jackal: 'quill_rat',
+    cinder_nomad: 'fallen',
+    web_drone: 'scarab',
+    fang_spider: 'scarab',
+    temple_cultist: 'fallen',
+    ash_raider: 'fallen',
+    council_acolyte: 'fallen',
+    horn_brute: 'zombie',
+    ember_hound: 'quill_rat',
+    void_thrall: 'zombie',
+    keep_sentinel: 'fallen',
+    crypt_warden: 'zombie',
+    dune_hollow: 'scarab',
+    venom_matron: 'scarab',
+    hall_cleaver: 'cleaver',
+    butcher: 'cleaver',
+    council_shade: 'fallen',
+    ash_sovereign: 'cleaver',
+    last_ember: 'cleaver',
+    fallen_shaman: 'fallen',
+    shaman: 'fallen'
+  };
+  if (alias[t]) t = alias[t];
 
   let matrix, palette;
   let size = 3;
@@ -188,7 +217,7 @@ window.render8BitEntity = function(ctx, x, y, rawType, direction = 'down') {
   } else if (monsterSprites[t]) {
     matrix = monsterSprites[t];
     palette = palettes.monster;
-    if (t === 'butcher') size = 4;
+    if (t === 'cleaver') size = 4;
   } else {
     matrix = heroSprites.warrior;
     palette = palettes.hero;

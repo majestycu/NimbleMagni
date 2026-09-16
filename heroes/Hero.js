@@ -104,20 +104,27 @@
         }
 
         draw(ctx, isLeader) {
-            if (window.render8BitEntity) {
-                window.render8BitEntity(ctx, this.x, this.y, this.type, (this.dir || 'DOWN').toLowerCase());
-            } else {
-                ctx.fillStyle = this.color || '#fff';
+            if (isLeader) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
+                ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.arc(this.x, this.y + 10, 8, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
             }
-
-            ctx.save();
-            ctx.strokeStyle = isLeader ? '#facc15' : '#ffffff';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(this.x - 12, this.y - 16, 24, 24);
-            ctx.restore();
+            const heroImg = window.AssetBank && window.AssetBank.get('heroes', this.type);
+            const painted = heroImg && window.AssetBank.drawChroma(ctx, heroImg, this.x, this.y - 8, 52, 52);
+            if (!painted) {
+                if (window.render8BitEntity) {
+                    window.render8BitEntity(ctx, this.x, this.y, this.type, (this.dir || 'DOWN').toLowerCase());
+                } else {
+                    ctx.fillStyle = this.color || '#fff';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
 
             const barW = 28;
             const barH = 4;

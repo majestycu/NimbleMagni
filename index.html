@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nimble Quest: Sanctuary</title>
+    <title>Nimble Magni</title>
     <style>
         body, html {
             margin: 0;
@@ -160,8 +160,8 @@
     <canvas id="gameCanvas"></canvas>
 
     <div id="start-screen">
-        <h1>NIMBLE QUEST: SANCTUARY</h1>
-        <div class="subtitle">Alege liderul convoiului:</div>
+        <h1>NIMBLE MAGNI</h1>
+        <div class="subtitle">Prototype — alege liderul convoiului:</div>
         <div class="hero-grid">
             <div class="hero-card selected" onclick="selectHero('warrior', this)">
                 <div class="hero-name">⚔️ Warrior</div>
@@ -239,8 +239,12 @@
         }
     </script>
 
+    <script src="assets/AssetBank.js"></script>
     <script src="audio.js"></script>
     <script src="sprites.js"></script>
+    <script src="Campaign.js"></script>
+    <script src="WorldBoard.js"></script>
+    <script src="EnemySpawner.js"></script>
     <script src="enemies.js"></script>
     <script src="skills/SkillEffects.js"></script>
     <script src="skills/Skill.js"></script>
@@ -258,7 +262,6 @@
     <script src="ConvoyManager.js"></script>
     <script src="WaveManager.js"></script>
     <script src="GameEngine.js"></script>
-    <script src="enemies_act1.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

@@ -68,7 +68,7 @@ window.ConvoyManager = {
         if (!player) return;
         if (player.vx === undefined || (player.vx === 0 && player.vy === 0)) {
             player.vx = 0;
-            player.vy = -(player.speed || 3);
+            player.vy = -(player.speed || (window.Campaign && window.Campaign.PLAYER_SPEED) || 132);
         }
         if (player.dir === undefined) {
             player.dir = { x: 0, y: -1 };

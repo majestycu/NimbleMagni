@@ -49,7 +49,7 @@ window.GameEngine = {
         }
 
         window.projectiles = this.projectiles = window.projectiles || this.projectiles || [];
-        this.enemies = (window.EnemiesAct1 && window.EnemiesAct1.enemies) ? window.EnemiesAct1.enemies : (window.enemies || []);
+        this.enemies = (window.EnemySpawner && window.EnemySpawner.enemies) ? window.EnemySpawner.enemies : (window.enemies || []);
         window.enemies = this.enemies;
 
         if (window.InputManager && typeof window.InputManager.update === 'function') {
@@ -59,39 +59,25 @@ window.GameEngine = {
             if (window.ConvoyManager && typeof window.ConvoyManager.initMovement === 'function') {
                 window.ConvoyManager.initMovement(window.player);
             }
-            window.player.x += (window.player.vx || 0);
-            window.player.y += (window.player.vy || 0);
+            window.player.x += (window.player.vx || 0) * deltaTime;
+            window.player.y += (window.player.vy || 0) * deltaTime;
         }
         if (window.ConvoyManager && window.player && window.trail && window.convoi) {
             window.ConvoyManager.updateConvoy(window.player, window.trail, window.convoi, window.TRAIL_SPACING || 23, deltaTime);
         }
 
-        if (window.WaveManager && window.player && window.canvas) {
-            window.WaveManager.update(
+        if (window.EnemySpawner && window.player && window.canvas) {
+            window.EnemySpawner.update(
                 deltaTime,
                 window.canvas,
                 window.gameTime || 0,
-                window.kills || 0,
-                window.currentAct || 1,
-                window.LEFT_PANEL_WIDTH || 200,
                 window.player,
-                this.enemies,
                 this.projectiles,
-                window.chests || [],
-                window.itemDrops || [],
-                window.skillOrbs || [],
-                window.xpGems || [],
-                window.unclaimedHeroes || [],
-                window.convoi || [],
-                (ft) => { if (window.floatingTexts) window.floatingTexts.push(ft); },
-                () => { if (window.gameOver) window.gameOver(); }
+                (ft) => { if (window.floatingTexts) window.floatingTexts.push(ft); }
             );
+            this.enemies = window.EnemySpawner.enemies;
+            window.enemies = this.enemies;
         }
-
-        // status ticks
-        (this.enemies || []).forEach(e => {
-            if (window.StatusEffects) window.StatusEffects.tickEnemy(e, deltaTime);
-        });
 
         if (window.GroundZones) {
             window.GroundZones.update(deltaTime, this.enemies);
@@ -114,15 +100,7 @@ window.GameEngine = {
             window.projectiles = this.projectiles;
         }
 
-        // kill counting / cleanup
-        const before = this.enemies.length;
-        this.enemies = this.enemies.filter(e => e && e.hp > 0);
-        const killed = before - this.enemies.length;
-        if (killed > 0) {
-            window.kills = (window.kills || 0) + killed;
-            window.score = (window.score || 0) + killed * 10;
-        }
-        if (window.EnemiesAct1) window.EnemiesAct1.enemies = this.enemies;
+        this.enemies = (window.EnemySpawner && window.EnemySpawner.enemies) || this.enemies.filter(e => e && e.hp > 0);
         window.enemies = this.enemies;
 
         if (window.particles) {

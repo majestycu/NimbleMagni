@@ -8,6 +8,7 @@ window.addEventListener('error', function(e) {
 });
 
 window.addEventListener('load', () => {
+    if (window.AssetBank) window.AssetBank.preload();
     const canvas = document.getElementById('gameCanvas');
     window.canvas = canvas;
     const ctx = canvas.getContext('2d');
@@ -33,9 +34,9 @@ window.addEventListener('load', () => {
     window.player = {
         x: window.LEFT_PANEL_WIDTH + (canvas.width - window.LEFT_PANEL_WIDTH) / 2,
         y: canvas.height / 2,
-        speed: 3,
+        speed: (window.Campaign && window.Campaign.PLAYER_SPEED) || 132,
         vx: 0,
-        vy: -3,
+        vy: -((window.Campaign && window.Campaign.PLAYER_SPEED) || 132),
         dir: { x: 0, y: -1 },
         radius: 12,
         hp: 150,
@@ -177,6 +178,9 @@ window.addEventListener('load', () => {
             window.GameEngine.stop();
         }
         if (window.SoundManager) window.SoundManager.init();
+        window.Campaign.reset();
+        window.actKills = 0;
+        if (window.EnemySpawner) window.EnemySpawner.reset();
         window.gameState = 'PLAYING';
         window.gamePaused = false;
         window.currentAct = 1;
@@ -185,6 +189,7 @@ window.addEventListener('load', () => {
         window.gameTime = 0;
         window.killsSinceLastChest = 0;
 
+        window.player.speed = window.Campaign.PLAYER_SPEED;
         window.player.x = window.LEFT_PANEL_WIDTH + (canvas.width - window.LEFT_PANEL_WIDTH) / 2;
         window.player.y = canvas.height / 2;
         window.player.vx = 0;
@@ -219,7 +224,7 @@ window.addEventListener('load', () => {
             attackSpeedCount: 0,
             mightyOrbCount: 0
         };
-        window.player.speed = 3;
+        window.player.speed = window.Campaign.PLAYER_SPEED;
         window.player.vx = 0;
         window.player.vy = -window.player.speed;
 
@@ -273,6 +278,8 @@ window.addEventListener('load', () => {
             window.forestDecorations.push({ x: tx, y: ty, type: decType });
         }
 
+        window.boardDecor = window.WorldBoard.generate(canvas, window.Campaign.current());
+
         let startScreen = document.getElementById('start-screen');
         if (startScreen) startScreen.style.display = 'none';
         let gameOverMenu = document.getElementById('gameOverMenu');
@@ -324,92 +331,10 @@ window.addEventListener('load', () => {
     window.draw = function() {
         try {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            let tileSize = 32;
-            for (let x = window.LEFT_PANEL_WIDTH; x < canvas.width; x += tileSize) {
-                for (let y = 0; y < canvas.height; y += tileSize) {
-                    let tileIndex = (Math.floor(x / tileSize) + Math.floor(y / tileSize)) % 2;
-                    if (window.currentAct === 2) {
-                        ctx.fillStyle = tileIndex === 0 ? '#c8b265' : '#baa255';
-                    } else {
-                        ctx.fillStyle = tileIndex === 0 ? '#223e20' : '#1c331a';
-                    }
-                    ctx.fillRect(x, y, tileSize, tileSize);
-                }
+            const act = window.Campaign.current();
+            if (window.WorldBoard) {
+                window.WorldBoard.draw(ctx, canvas, act, window.boardDecor || [], window.gameTime);
             }
-
-            if (window.currentAct === 1) {
-                window.grassPatches.forEach(gp => {
-                    ctx.fillStyle = gp.color;
-                    ctx.beginPath();
-                    ctx.arc(gp.x, gp.y, gp.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#1e3f20';
-                    ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.moveTo(gp.x, gp.y);
-                    ctx.lineTo(gp.x - 3, gp.y - 6);
-                    ctx.moveTo(gp.x, gp.y);
-                    ctx.lineTo(gp.x + 3, gp.y - 7);
-                    ctx.moveTo(gp.x, gp.y);
-                    ctx.lineTo(gp.x, gp.y - 8);
-                    ctx.stroke();
-                });
-
-                window.forestDecorations.forEach(dec => {
-                    if (dec.type === 'tree') {
-                        ctx.fillStyle = '#5c4033';
-                        ctx.fillRect(dec.x - 4, dec.y, 8, 12);
-                        ctx.fillStyle = '#1b3f17';
-                        ctx.beginPath();
-                        ctx.arc(dec.x, dec.y - 6, 12, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.fillStyle = '#275d21';
-                        ctx.beginPath();
-                        ctx.arc(dec.x - 6, dec.y - 12, 10, 0, Math.PI * 2);
-                        ctx.arc(dec.x + 6, dec.y - 12, 10, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else if (dec.type === 'stump') {
-                        ctx.fillStyle = '#3f2e22';
-                        ctx.beginPath();
-                        ctx.ellipse(dec.x, dec.y, 10, 6, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.strokeStyle = '#271c14';
-                        ctx.lineWidth = 1.5;
-                        ctx.stroke();
-                        ctx.fillStyle = '#5c4033';
-                        ctx.beginPath();
-                        ctx.ellipse(dec.x, dec.y, 6, 3, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else if (dec.type === 'tombstone') {
-                        ctx.fillStyle = '#52525b';
-                        ctx.fillRect(dec.x - 5, dec.y - 8, 10, 12);
-                        ctx.beginPath();
-                        ctx.arc(dec.x, dec.y - 8, 5, Math.PI, 0);
-                        ctx.fill();
-                    } else {
-                        ctx.fillStyle = '#d4d4d8';
-                        ctx.fillRect(dec.x - 6, dec.y - 2, 12, 4);
-                        ctx.fillRect(dec.x - 3, dec.y - 6, 6, 8);
-                    }
-                });
-            }
-
-            let wallThickness = 32;
-            ctx.fillStyle = '#1a1a1f';
-            ctx.fillRect(window.LEFT_PANEL_WIDTH, 0, canvas.width - window.LEFT_PANEL_WIDTH, wallThickness);
-            ctx.fillRect(window.LEFT_PANEL_WIDTH, canvas.height - wallThickness, canvas.width - window.LEFT_PANEL_WIDTH, wallThickness);
-            ctx.fillRect(window.LEFT_PANEL_WIDTH, 0, wallThickness, canvas.height);
-            ctx.fillRect(canvas.width - wallThickness, 0, wallThickness, canvas.height);
-
-            ctx.strokeStyle = '#2d2d35';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(window.LEFT_PANEL_WIDTH + wallThickness, wallThickness, canvas.width - window.LEFT_PANEL_WIDTH - wallThickness * 2, canvas.height - wallThickness * 2);
-
-            window.drawTorch(window.LEFT_PANEL_WIDTH + wallThickness + 15, wallThickness + 15, window.gameTime);
-            window.drawTorch(canvas.width - wallThickness - 15, wallThickness + 15, window.gameTime + 1);
-            window.drawTorch(window.LEFT_PANEL_WIDTH + wallThickness + 15, canvas.height - wallThickness - 15, window.gameTime + 2);
-            window.drawTorch(canvas.width - wallThickness - 15, canvas.height - wallThickness - 15, window.gameTime + 3);
 
             if (window.WaveManager && window.WaveManager.townPortal) {
                 let tp = window.WaveManager.townPortal;
@@ -496,8 +421,8 @@ window.addEventListener('load', () => {
 
             if (window.GroundZones) window.GroundZones.draw(ctx);
 
-            if (window.currentAct === 1 && window.EnemiesAct1) {
-                window.EnemiesAct1.renderEnemiesAct1(ctx, canvas, window.gameTime);
+            if (window.EnemySpawner) {
+                window.EnemySpawner.draw(ctx);
             }
 
             window.projectiles.forEach(p => {
@@ -544,7 +469,11 @@ window.addEventListener('load', () => {
             ctx.fillStyle = '#facc15';
             ctx.font = 'bold 14px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText("🛡️ CONVOI HEROES 🛡️", window.LEFT_PANEL_WIDTH / 2, 25);
+            ctx.fillText("NIMBLE MAGNI", window.LEFT_PANEL_WIDTH / 2, 25);
+            const actLabel = window.Campaign.current();
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px monospace';
+            ctx.fillText(actLabel ? actLabel.name : '', window.LEFT_PANEL_WIDTH / 2, 40);
 
             let panelY = 55;
             window.convoi.forEach((hero, idx) => {

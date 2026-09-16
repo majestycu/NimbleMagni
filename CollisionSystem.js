@@ -1,24 +1,20 @@
 window.CollisionSystem = {
     resolveCollisions(player, convoi, enemies, projectiles, items, xpGems, chests, skillOrbs, unclaimedHeroes, townPortal, canvas, currentAct, gameOverCallback, gainXpCallback, addFloatingText) {
-        const wallMargin = 32;
+        const wallMargin = (window.Campaign && window.Campaign.WALL_MARGIN) || 32;
         const LEFT_PANEL_WIDTH = window.LEFT_PANEL_WIDTH || 220;
 
-        if (player.x < LEFT_PANEL_WIDTH + wallMargin) player.x = LEFT_PANEL_WIDTH + wallMargin;
-        if (player.x > canvas.width - wallMargin) player.x = canvas.width - wallMargin;
-        if (player.y < wallMargin) player.y = wallMargin;
-        if (player.y > canvas.height - wallMargin) player.y = canvas.height - wallMargin;
+        if (player.x < LEFT_PANEL_WIDTH + wallMargin || player.x > canvas.width - wallMargin ||
+            player.y < wallMargin || player.y > canvas.height - wallMargin) {
+            if (window.SoundManager) window.SoundManager.hit();
+            gameOverCallback();
+            return;
+        }
 
         for (let i = 2; i < convoi.length; i++) {
             if (Math.hypot(player.x - convoi[i].x, player.y - convoi[i].y) < 12) {
-                if (player.invulnerableTimer <= 0) {
-                    player.hp -= 8;
-                    player.invulnerableTimer = 0.5;
-                    if (window.SoundManager) window.SoundManager.hit();
-                    if (player.hp <= 0) {
-                        gameOverCallback();
-                        return;
-                    }
-                }
+                if (window.SoundManager) window.SoundManager.hit();
+                gameOverCallback();
+                return;
             }
         }
 
@@ -94,6 +90,24 @@ window.CollisionSystem = {
             if (Math.hypot(player.x - drop.x, player.y - drop.y) < 18) {
                 if (window.SoundManager) window.SoundManager.collect();
                 drop.collected = true;
+                window.gameUpgrades = window.gameUpgrades || { speedBoostCount: 0, attackSpeedCount: 0, mightyOrbCount: 0 };
+                if (drop.type === 'BOOTS') {
+                    window.gameUpgrades.speedBoostCount++;
+                    player.speed = window.Campaign.PLAYER_SPEED * (1 + window.gameUpgrades.speedBoostCount * 0.08);
+                    if (player.vx !== 0) player.vx = Math.sign(player.vx) * player.speed;
+                    if (player.vy !== 0) player.vy = Math.sign(player.vy) * player.speed;
+                    addFloatingText({ x: player.x, y: player.y - 18, text: 'SPEED', color: '#06b6d4', timer: 1 });
+                } else if (drop.type === 'ATTACK_SPEED') {
+                    window.gameUpgrades.attackSpeedCount++;
+                    (window.convoi || []).forEach(h => { h.castMult = Math.max(0.7, (h.castMult || 1) * 0.94); });
+                    addFloatingText({ x: player.x, y: player.y - 18, text: 'CAST', color: '#ef4444', timer: 1 });
+                } else if (drop.type === 'HEART') {
+                    player.hp = Math.min(player.maxHp, player.hp + 40);
+                    addFloatingText({ x: player.x, y: player.y - 18, text: '+HP', color: '#22c55e', timer: 1 });
+                } else if (drop.type === 'MIGHTY_ORB') {
+                    window.gameUpgrades.mightyOrbCount++;
+                    addFloatingText({ x: player.x, y: player.y - 18, text: 'MIGHT', color: '#a855f7', timer: 1 });
+                }
             }
         });
 
